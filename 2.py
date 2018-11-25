@@ -1,6 +1,0 @@
-a=float(input("Введіть значення змінної а "))
-b=float(input("Введіть значення змінної b "))
-print ("a+b=", a+b)
-print ("a-b=", a-b)
-print ("a*b=", a*b)
-print ("a/b=", a/b)
