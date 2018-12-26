@@ -77,3 +77,17 @@ while i==1:
     elif choice=='7':
         print('thanks that you used my app')
         break
+
+        
+  def fibonacci(a):
+    m=0
+    n=1
+    s=0
+    print('Числа фібоначі до числа ', a)
+    while m<a:
+        print (m)
+        s=m+n
+        n=m
+        m=s
+f=int(input("Введіть число  "))
+fibonacci(f)
