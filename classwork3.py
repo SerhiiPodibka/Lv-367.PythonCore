@@ -33,3 +33,18 @@ for i in range(k):
     n=int(input("enter the element"))
     if n<=0:
         break
+
+login="First"
+a=input("Введіть логін ")
+if a==login:
+    print("Welcome!")
+while a!=login:
+    print('error')
+    break
+    
+i=0
+while i==0:
+    a=int(input("enter number "))
+    if a<=0:
+        print ("your number is negative or 0")
+        i+=1
