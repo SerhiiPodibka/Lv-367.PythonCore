@@ -1,0 +1,111 @@
+from tkinter import *
+import random
+
+
+WIDTH = 800
+HEIGHT = 600
+SEG_SIZE = 25
+IN_GAME = True
+
+
+
+def create_block(): # створює блок яблуко у випадковій позиції, заливка червона
+    global BLOCK
+    posx = SEG_SIZE * random.randint(1, (WIDTH-SEG_SIZE) / SEG_SIZE)
+    posy = SEG_SIZE * random.randint(1, (HEIGHT-SEG_SIZE) / SEG_SIZE)
+    BLOCK = c.create_oval(posx, posy, posx+SEG_SIZE, posy+SEG_SIZE, fill="red")
+
+
+def main():
+    global IN_GAME
+    if IN_GAME:
+        s.move() #рух
+        head_coords = c.coords(s.segments[-1].instance)# визначення координат голови
+        x1, y1, x2, y2 = head_coords
+        # зіткнення з межами ігрового поля
+        if x2 > WIDTH or x1 < 0 or y1 < 0 or y2 > HEIGHT:
+            IN_GAME = False
+        # Поїдання яблука
+        elif head_coords == c.coords(BLOCK):
+            s.add_segment()
+            c.delete(BLOCK)
+            create_block()
+        # само поїдання
+        else:
+            for index in range(len(s.segments)-1):# прохід по всіх сегментах змії
+                if head_coords == c.coords(s.segments[index].instance):# якщо голова зіткнулася з іншим сегментом
+                    IN_GAME = False
+        root.after(100, main)
+    # Повідомлення про завершення гри
+    else:
+        c.create_text(WIDTH/2, HEIGHT/2,
+                      text="GAME OVER!",
+                      font="Arial 20",
+                      fill="red")
+
+#за допомогою методу create_rectangle створюємо сегмент
+class Segment(object):
+    """ Single snake segment """
+    def __init__(self, x, y):
+        self.instance = c.create_rectangle(x, y, x+SEG_SIZE, y+SEG_SIZE, fill="white")
+
+
+class Snake(object):
+    """ Simple Snake class """
+    def __init__(self, segments):
+        self.segments = segments
+        # список доступних напрямків руху змійки
+        self.mapping = {"Down": (0, 1), "Right": (1, 0), "Up": (0, -1), "Left": (-1, 0)}
+        # спочатку змійка рухається вправо
+        self.vector = self.mapping["Right"]
+        
+
+    def move(self): # Рух змійки в заданому напрямку
+        # перебираємо всі сегменти крім першого
+        for index in range(len(self.segments)-1):
+            segment = self.segments[index].instance
+            # задаємо кожному сегменту позицію сегмента стоїть після нього
+            x1, y1, x2, y2 = c.coords(self.segments[index+1].instance)
+            c.coords(segment, x1, y1, x2, y2)
+        # отримуємо координати сегмента перед "головою"
+        x1, y1, x2, y2 = c.coords(self.segments[-2].instance)
+        # поміщаємо "голову" в напрямку вказаному в векторі руху
+        c.coords(self.segments[-1].instance,
+                 x1+self.vector[0]*SEG_SIZE, y1+self.vector[1]*SEG_SIZE,
+                 x2+self.vector[0]*SEG_SIZE, y2+self.vector[1]*SEG_SIZE)
+
+    def add_segment(self):# додати сегмент змійці
+        # визначити останній сегмент
+        last_seg = c.coords(self.segments[0].instance)
+        # визначаємо координати куди поставити наступний сегмент
+        x = last_seg[2] - SEG_SIZE
+        y = last_seg[3] - SEG_SIZE
+        # додаємо змійці ще один сегмент в заданих координатах
+        self.segments.insert(0, Segment(x, y))
+        
+        # функція зміни напрямку
+    def change_direction(self, event):
+        # event передає символ натиснутої клавіші
+        if event.keysym in self.mapping:
+            self.vector = self.mapping[event.keysym]
+
+# створення вікна
+root = Tk() #базовий клас бібліотеки
+root.title("Snake") #назва вікна
+
+#установити область для малювання і залити кольором
+c = Canvas(root, width=WIDTH, height=HEIGHT, bg="#003300")
+c.grid()
+# натискання клавіш
+c.focus_set()
+# створення 3-х сегментів і потім snake
+segments = [Segment(SEG_SIZE, SEG_SIZE),
+            Segment(SEG_SIZE*2, SEG_SIZE),
+            Segment(SEG_SIZE*3, SEG_SIZE)]
+s = Snake(segments)
+# реакція на натискання клавіш
+c.bind("<KeyPress>", s.change_direction)
+
+create_block()
+main()
+root.mainloop()
